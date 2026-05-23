@@ -189,4 +189,4 @@ Review your own data retention, consent, and compliance requirements before usin
 
 ## License
 
-No license has been specified yet.
+This project is licensed under the Apache License 2.0. See `LICENSE` for details.
