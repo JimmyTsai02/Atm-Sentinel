@@ -11,6 +11,7 @@ htmlcov/
 .DS_Store
 Thumbs.db
 .vscode/
+ATM_Guard_PRD.docx
 logs/
 atm_guard.db
 *.sqlite

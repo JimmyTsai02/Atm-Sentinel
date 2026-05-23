@@ -1,22 +1,40 @@
 # ATM Guard CLI MVP
 
-ATM Guard 是一個本地端 ATM 異常行為偵測 CLI MVP。系統使用 OpenCV 擷取 Webcam / RTSP 影像，透過 YOLOv8 在本地偵測人物，當觸發徘徊或遮擋事件後，將截圖交給 GPT-4o Vision 判斷風險，最後執行 terminal 警報、terminal 模擬凍結與 SQLite 事件記錄。
+ATM Guard 是一個本地端 Python CLI side project，用來測試 ATM 監控影像的異常事件判斷流程。
 
-## 功能
+目前版本是 MVP，不是正式監控產品。它主要用來驗證以下流程是否可行：
 
-- Webcam / RTSP 影像來源
+```text
+Webcam / RTSP 影像
+→ YOLOv8 偵測人物
+→ 觸發事件時截圖
+→ GPT-4o Vision 判斷風險
+→ terminal 顯示警示
+→ SQLite 記錄事件
+```
+
+## 目前支援
+
+- Webcam 或 RTSP 影像來源
 - YOLOv8n 本地 person 偵測
-- 徘徊計時
-- 多訊號遮擋偵測：黑畫面、過亮畫面、低邊緣密度、低清晰度、低亮度變化
+- 人物停留時間計算
+- 簡易鏡頭遮擋偵測
+- 單張圖片測試
+- 資料夾批次圖片測試
 - GPT-4o Vision 風險判斷
-- 戴安全帽或口罩操作 ATM 會判定為違規，至少觸發風險等級 2
-- Function Calling 工具決策
-- terminal 警報
+- 戴口罩或安全帽操作 ATM 時，依目前規則判定為風險等級 2
+- terminal 警示輸出
 - terminal 模擬凍結
 - SQLite 事件記錄
-- 截圖儲存於 `logs/`
 
-Telegram 通知目前暫不實作，MVP 只保留本地 log。
+## 目前限制
+
+- 尚未串接 Telegram 通知
+- 尚未支援真實 ATM 控制 API
+- 尚未支援多路攝影機同時監控
+- 尚未實作人臉辨識、身分識別或車牌辨識
+- 鏡頭遮擋與違規判斷仍屬 MVP 規則，需要依實際場景調參
+- GPT-4o 判斷結果可能受圖片角度、光線、遮擋與 prompt 影響
 
 ## 專案結構
 
@@ -37,12 +55,11 @@ Telegram 通知目前暫不實作，MVP 只保留本地 log。
 └── samples/
 ```
 
-## API Key 設定
+## API Key
 
 請在專案根目錄建立 `.env`：
 
 ```powershell
-cd "D:\side project_detect"
 Copy-Item .env.example .env
 notepad .env
 ```
@@ -54,17 +71,19 @@ OPENAI_API_KEY=你的 OpenAI API key
 OPENAI_MODEL=gpt-4o
 ```
 
-不要把 `.env` 提交到版本控制；本專案已在 `.gitignore` 忽略 `.env`。
+`.env` 已被 `.gitignore` 忽略，請不要提交真實 API key。
 
 ## 安裝
 
 ```powershell
-cd "D:\side project_detect"
+python -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## 執行 Webcam / RTSP 偵測
+第一次使用 YOLOv8n 時，Ultralytics 會下載 `yolov8n.pt` 權重檔。此檔案已被 `.gitignore` 忽略。
+
+## 執行 Webcam / RTSP
 
 使用預設 Webcam：
 
@@ -86,11 +105,7 @@ python main.py --camera "rtsp://user:password@host/stream"
 
 ## 圖片測試
 
-測試圖片統一放在：
-
-```text
-D:\side project_detect\samples
-```
+測試圖片可放在 `samples/`。實際圖片不會提交到 GitHub，資料夾內只保留 `.gitkeep`。
 
 單張圖片測試：
 
@@ -130,9 +145,7 @@ WHERE risk_level >= 2
 ORDER BY id DESC;
 ```
 
-## GitHub 注意事項
-
-以下檔案不應提交：
+## 不提交到 GitHub 的檔案
 
 - `.env`
 - `venv/`
@@ -140,5 +153,4 @@ ORDER BY id DESC;
 - `atm_guard.db`
 - `samples/` 內的測試圖片
 - `*.pt` YOLO 權重檔
-
-請提交 `.env.example`，讓其他環境知道需要哪些設定。
+- `ATM_Guard_PRD.docx`
